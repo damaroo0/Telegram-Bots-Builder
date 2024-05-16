@@ -1,1 +1,1 @@
-# web-parser/main.py
+# web_parse/main.py
