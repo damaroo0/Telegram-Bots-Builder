@@ -6,7 +6,7 @@ This repository contains a collection of Telegram bots developed to enhance your
 
 ## Available Bots:
 
-1. **Base Bot for Gathering Evaluation Statistics**
+1. **A bot for finding places to stay**
 2. **In Development**
 3. **In Development**
 
