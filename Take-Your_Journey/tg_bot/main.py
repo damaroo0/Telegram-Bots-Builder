@@ -15,7 +15,9 @@ from config import TOKEN
 
 from data_base.main import check_if_database_exists
 from handler import (
-    start_command, connection_keyboard_create
+    CreateProfileStates,
+    start_command, 
+    connection_keyboard_create, process_codename
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -23,12 +25,13 @@ logging.basicConfig(level=logging.INFO)
 storage = MemoryStorage()
 
 bot = Bot(token=TOKEN)
-dispatcher = Dispatcher(bot, storage)
+dispatcher = Dispatcher(bot, storage=storage)
 
 # Registering handlers
 dispatcher.register_message_handler(start_command, Command("start"))
 
-dispatcher.register_message_handler(connection_keyboard_create, Text(equals='Create a profile and authorise'))
+dispatcher.register_message_handler(connection_keyboard_create, Text(equals='Sign in and create your first profile'))
+dispatcher.register_message_handler(process_codename, state=CreateProfileStates.waiting_for_codename)
 
 #
 async def on_startup(_):

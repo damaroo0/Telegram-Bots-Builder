@@ -18,7 +18,7 @@ main_keyboard.add(*main_keyboard_buttons)
 #
 connection_keyboard = ReplyKeyboardMarkup(resize_keyboard=True, )
 connection_keyboard_buttons = [
-    KeyboardButton(text='Create a profile and authorise'),
+    KeyboardButton(text='Sign in and create your first profile'),
     KeyboardButton(text='Connect to another Users profile'),
     KeyboardButton(text='Connect to another sample'),
 ]
