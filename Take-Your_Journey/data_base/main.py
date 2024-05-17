@@ -29,18 +29,26 @@ def create_database():
 def check_user_in_user_table(user_id, user_name):
     conn = connect_to_database()
     cursor = conn.cursor()
+
+    # check if the users table exists
     cursor.execute("SELECT count(name) FROM sqlite_master WHERE type='table' AND name='users';")
     table_exists = cursor.fetchone()[0]
-    if table_exists:
-        cursor.execute("SELECT count(*) FROM users WHERE user_id = ? AND user_name = ?", (user_id, user_name))
-        user_exists = cursor.fetchone()[0]
-        if user_exists:
-            return True
-        else:
-            return False
+
+    if not table_exists:
+        # if the table does not exist, create it
+        cursor.execute("CREATE TABLE users (user_id INTEGER PRIMARY KEY, user_name TEXT);")
+        print("User table created.")
+        conn.commit()
+
+    # check if the user exists in the table
+    cursor.execute("SELECT count(*) FROM users WHERE user_id = ? AND user_name = ?", (user_id, user_name))
+    user_exists = cursor.fetchone()[0]
+
+    if user_exists:
+        return True
     else:
-        print("user table does not exist.")
         return False
+
 
 # returns a list of all user-related tables
 def user_profile(user_id):
