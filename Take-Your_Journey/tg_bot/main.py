@@ -11,15 +11,19 @@ import logging
 
 
 from aiogram import Bot, Dispatcher, executor
+from aiogram.contrib.middlewares.i18n import I18nMiddleware
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher.filters import Command, Text
 
-from config import TOKEN
+from config import TOKEN, I18N_DOMAIN, LOCALES_DIR
 
 from data_base.main import check_if_database_exists
 from handler import (
     CreateProfileStates,
     start_command,
+    open_main_page,
+    help_command,
+    share_profile,
     connection_keyboard_create,
     process_profile_nametag,
 )
@@ -31,15 +35,30 @@ storage = MemoryStorage()
 bot = Bot(token=TOKEN)
 dispatcher = Dispatcher(bot, storage=storage)
 
+# configuring i18n - localisations for the bot
+i18n = I18nMiddleware(I18N_DOMAIN, LOCALES_DIR)
+dispatcher.middleware.setup(i18n)
+_ = i18n.gettext
+
 # Registering handlers
+# commands
 dispatcher.register_message_handler(start_command, Command("start"))
 
+dispatcher.register_message_handler(open_main_page, Command("main"))
+dispatcher.register_message_handler(help_command, Command("help"))
+
+dispatcher.register_message_handler(share_profile, Command("share_profile"))
+
+# buttons rwgistration
 dispatcher.register_message_handler(
-    connection_keyboard_create, Text(equals="Sign in and create your first profile")
+    connection_keyboard_create,
+    Text(equals="Sign in and create your first profile"),
 )
 dispatcher.register_message_handler(
     process_profile_nametag, state=CreateProfileStates.waiting_for_profile_nametag
 )
+
+dispatcher.register_message_handler(Text(equals="Connect to another Users profile"))
 
 
 #
