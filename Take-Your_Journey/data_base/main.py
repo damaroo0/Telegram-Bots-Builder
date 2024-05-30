@@ -4,13 +4,13 @@ from datetime import datetime
 DATABASE_NAME = "TakeYourJourney.db"
 
 
-# Connect to the database
+# connect to the database
 def connect_to_database():
     conn = sqlite3.connect(DATABASE_NAME)
     return conn
 
 
-# Check if the database exists and create it if not
+# check if the database exists and create it if not
 def check_if_database_exists():
     try:
         conn = connect_to_database()
@@ -20,32 +20,65 @@ def check_if_database_exists():
         print("Database does not exist, creating a new one...")
         create_database()
 
+    # ensure all necessary tables are created
+    create_user_table()
 
-# Create the database
+
+# create the database
 def create_database():
     conn = connect_to_database()
     conn.close()
     print("Database created successfully.")
 
 
-# Check for the existence of the user table and the presence of the user in it
+# create the users table if it does not exist
+def create_user_table():
+    conn = connect_to_database()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS users (
+            user_id INTEGER PRIMARY KEY,
+            user_name TEXT,
+            codename TEXT,
+            registration_date TEXT,
+            profile_count INTEGER
+        )
+        """
+    )
+    conn.commit()
+    conn.close()
+    print("User table checked/created successfully.")
+
+
+# create the user_profiles table if it does not exist
+def create_user_profiles_table(user_id):
+    conn = connect_to_database()
+    cursor = conn.cursor()
+    
+    user_profile = f"{user_id}_profiles"
+    
+    cursor.execute(
+        f"""
+        CREATE TABLE IF NOT EXISTS "{user_profile}" (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            profile_name TEXT,
+            profile_photo BLOB,
+            date_added TEXT,
+            FOREIGN KEY(user_id) REFERENCES users(user_id)
+        )
+        """
+    )
+    conn.commit()
+    conn.close()
+    print("User profiles table checked/created successfully.")
+
+
+# check for the existence of the user in the user table
 def check_user_in_user_table(user_id, user_name):
     conn = connect_to_database()
     cursor = conn.cursor()
-
-    # Check if the users table exists
-    cursor.execute(
-        "SELECT count(name) FROM sqlite_master WHERE type='table' AND name='users';"
-    )
-    table_exists = cursor.fetchone()[0]
-
-    if not table_exists:
-        # If the table does not exist, create it
-        cursor.execute(
-            "CREATE TABLE users (user_id INTEGER PRIMARY KEY, user_name TEXT, codename TEXT, registration_date TEXT, profile_count INTEGER);"
-        )
-        print("User table created.")
-        conn.commit()
 
     # Check if the user exists in the table
     cursor.execute(
@@ -54,13 +87,15 @@ def check_user_in_user_table(user_id, user_name):
     )
     user_exists = cursor.fetchone()[0]
 
+    conn.close()
+    
     if user_exists:
         return True
     else:
         return False
 
 
-# Returns a list of all user-related tables
+# returns a list of all user-related tables
 def user_profile(user_id):
     conn = connect_to_database()
     cursor = conn.cursor()
@@ -70,10 +105,11 @@ def user_profile(user_id):
     )
     tables = cursor.fetchall()
     table_names = [table[0] for table in tables]
+    conn.close()
     return table_names
 
 
-# Add a user to the database
+# add a user to the database
 def add_user(user_id, user_name):
     conn = connect_to_database()
     cursor = conn.cursor()
@@ -97,7 +133,7 @@ def add_user(user_id, user_name):
     visitings_table_name = f"{user_id}_visitings"
     cursor.execute(
         f"""
-        CREATE TABLE IF NOT EXISTS {visitings_table_name} (
+        CREATE TABLE IF NOT EXISTS "{visitings_table_name}" (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             visited_place TEXT,
             term_from TEXT,
@@ -120,18 +156,18 @@ def add_user(user_id, user_name):
     )
 
 
-# Create a profile for a user
+# create a profile for a user
 def profile_creating(user_id, profile_nametag):
     conn = connect_to_database()
     cursor = conn.cursor()
 
-    # Name of the profile table
+    # name of the profile table
     profile_table_name = f"{user_id}-{profile_nametag}"
 
-    # Create profile table with the specified fields
+    # create profile table with the specified fields
     cursor.execute(
         f"""
-        CREATE TABLE IF NOT EXISTS {profile_table_name} (
+        CREATE TABLE IF NOT EXISTS "{profile_table_name}" (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             profile_name TEXT,
             profile_photo BLOB,
@@ -145,7 +181,7 @@ def profile_creating(user_id, profile_nametag):
     """
     )
 
-    # Update user's profile count
+    # update user's profile count
     cursor.execute(
         """
         UPDATE users 
@@ -155,10 +191,11 @@ def profile_creating(user_id, profile_nametag):
         (user_id,),
     )
 
-    # Insert new profile into user_profiles table
+    # insert new profile into user(user_id)_profiles table
+    user_profile = f"{user_id}_profiles"
     cursor.execute(
-        """
-        INSERT INTO user_profiles (user_id, profile_name, profile_photo, date_added) 
+        f"""
+        INSERT INTO "{user_profile}" (user_id, profile_name, profile_photo, date_added) 
         VALUES (?, ?, ?, ?)
         """,
         (user_id, profile_nametag, None, datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
@@ -169,5 +206,5 @@ def profile_creating(user_id, profile_nametag):
     print(f"Profile table {profile_table_name} created for user {user_id}.")
 
 
-# Check if the database exists when this module is imported
+# check if the database exists when this module is imported
 check_if_database_exists()
