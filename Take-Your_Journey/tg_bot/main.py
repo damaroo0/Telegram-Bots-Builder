@@ -23,6 +23,7 @@ from handler import (
     start_command,
     open_main_page,
     help_command,
+    create_new_profile,
     share_profile,
     connection_keyboard_create,
     process_profile_nametag,
@@ -47,18 +48,20 @@ dispatcher.register_message_handler(start_command, Command("start"))
 dispatcher.register_message_handler(open_main_page, Command("main"))
 dispatcher.register_message_handler(help_command, Command("help"))
 
-dispatcher.register_message_handler(share_profile, Command("share_profile"))
+dispatcher.register_message_handler(share_profile, Command(_("share_profile")))
 
 # buttons rwgistration
 dispatcher.register_message_handler(
     connection_keyboard_create,
-    Text(equals="Sign in and create your first profile"),
+    Text(_(equals="Sign in and create your first profile")),
 )
 dispatcher.register_message_handler(
     process_profile_nametag, state=CreateProfileStates.waiting_for_profile_nametag
 )
 
-dispatcher.register_message_handler(Text(equals="Connect to another Users profile"))
+dispatcher.register_message_handler(create_new_profile, Text(_(equals="Create new profile")))
+
+dispatcher.register_message_handler(Text(_(equals="Connect to another Users profile")))
 
 
 #
