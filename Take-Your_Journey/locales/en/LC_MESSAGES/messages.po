@@ -1,1 +1,17 @@
-# en-
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: en\n"
+
+#: tg_bot/main.py
+
+msgid ""
+msgstr ""
+
+#: tg_bot/handler.py
+
+msgid "welcome to our bot 'TakeYourJourney'!"
+msgstr "welcome to our bot 'TakeYourJourney'!"
+
+msgid ""
+msgstr ""
